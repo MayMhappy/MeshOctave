@@ -417,7 +417,7 @@
       max-width: 900px;
       margin: 0 0 20px;
       font-family: var(--font-display);
-      font-size: clamp(2.7rem, 6.1vw, 5.7rem);
+      font-size: clamp(2.4rem, 5vw, 4.6rem);
       font-weight: 900;
       letter-spacing: -0.055em;
       line-height: 0.98;
@@ -437,61 +437,75 @@
     }
 
     .hero__authors {
-      max-width: 920px;
-      margin: 0 auto;
-      font-size: 1.03rem;
-      line-height: 1.7;
-    }
-
-    .hero__authors a {
-      color: inherit;
-      text-decoration-color: rgba(76, 130, 195, 0.34);
-      text-decoration-thickness: 1px;
-      text-underline-offset: 3px;
-      transition: color 0.16s ease, text-decoration-color 0.16s ease;
-    }
-
-    .hero__authors a:hover {
-      color: var(--accent-dark);
-      text-decoration-color: var(--accent);
-    }
-
-    .hero__authors a:focus-visible {
-      border-radius: 2px;
-      outline: 2px solid var(--accent);
-      outline-offset: 3px;
+      max-width: 900px;
+      margin: 0;
+      color: #fff;
+      font-size: 1.02rem;
+      font-weight: 650;
+      line-height: 1.75;
+      animation: hero-content-rise 0.75s ease-out 0.84s both;
     }
 
     .author-line {
       display: block;
     }
 
+    .author {
+      display: inline-block;
+      margin-right: 0.85em;
+      white-space: nowrap;
+    }
+
+    .hero__authors a {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-color: rgba(242, 215, 255, 0.35);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 4px;
+      transition: color 0.16s ease, text-decoration-color 0.16s ease;
+    }
+
+    .hero__authors a:hover {
+      color: #f2d7ff;
+      text-decoration-color: #f2d7ff;
+    }
+
+    .hero__authors a:focus-visible {
+      border-radius: 2px;
+      outline: 2px solid #f2d7ff;
+      outline-offset: 3px;
+    }
+
+    .hero__authors sup,
+    .hero__affil sup,
+    .hero__notes sup {
+      margin-left: 1px;
+      color: #f2d7ff;
+      font-size: 0.68em;
+      font-weight: 750;
+    }
+
     .hero__affil {
-      max-width: 820px;
-      margin: 9px auto 0;
-      color: var(--text-soft);
-      font-size: 0.91rem;
-      line-height: 1.5;
+      max-width: 900px;
+      margin: 10px 0 0;
+      color: rgba(255, 255, 255, 0.74);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      animation: hero-content-rise 0.75s ease-out 0.9s both;
     }
 
     .hero__affil span {
-      display: block;
+      display: inline-block;
+      margin-right: 1.3em;
+      white-space: nowrap;
     }
 
     .hero__notes {
-      margin: 11px auto 0;
-      color: #718097;
-      font-size: 0.79rem;
+      margin: 4px 0 0;
+      color: rgba(255, 255, 255, 0.56);
+      font-size: 0.78rem;
       line-height: 1.5;
-    }
-
-    .hero__notes span {
-      display: block;
-    }
-
-    .hero__notes sup {
-      color: var(--accent-dark);
-      font-weight: 800;
+      animation: hero-content-rise 0.75s ease-out 0.94s both;
     }
 
     .actions {
@@ -633,6 +647,9 @@
     .is-preload .hero__eyebrow,
     .is-preload .hero__title,
     .is-preload .hero__title-mark,
+    .is-preload .hero__authors,
+    .is-preload .hero__affil,
+    .is-preload .hero__notes,
     .is-preload .hero .actions,
     .is-preload .hero__facts,
     .is-preload .hero__scroll,
@@ -1876,7 +1893,7 @@
       }
 
       .hero__title {
-        font-size: clamp(2.4rem, 12.5vw, 3.5rem);
+        font-size: clamp(2rem, 9.5vw, 2.9rem);
         line-height: 1.01;
       }
 
@@ -1889,8 +1906,13 @@
         display: inline;
       }
 
-      .author-line + .author-line::before {
-        content: " ";
+      .hero__authors {
+        font-size: 0.92rem;
+      }
+
+      .hero__affil span {
+        display: block;
+        white-space: normal;
       }
 
       .hero__facts {
@@ -1999,6 +2021,9 @@
       .hero__veil,
       .hero__eyebrow,
       .hero__title,
+      .hero__authors,
+      .hero__affil,
+      .hero__notes,
       .hero .actions,
       .hero__facts,
       .hero__scroll {
@@ -2013,6 +2038,9 @@
       .hero__eyebrow,
       .hero__title,
       .hero__title-mark,
+      .hero__authors,
+      .hero__affil,
+      .hero__notes,
       .hero .actions,
       .hero__facts,
       .hero__scroll {

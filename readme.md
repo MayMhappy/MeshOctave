@@ -1,4 +1,4 @@
-Project page for **MeshOctave: Split-and-Rewire Cascades for Mesh Generation**.
+Project page for **MeshOctave: Vertex Split-and-Rewire Cascades for Native Mesh Generation**.
 
 ## Local preview
 
