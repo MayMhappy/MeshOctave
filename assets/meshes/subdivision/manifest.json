@@ -1,0 +1,24 @@
+{
+  "sets": [
+    {
+      "name": "Desk",
+      "coarse": "desk/coarse_res64.obj",
+      "ours": "desk/ours.obj",
+      "camera": [-3.37, 1.15, -1.81],
+      "focus": [
+        { "name": "Overview", "icon": "fa-cube" },
+        { "name": "Bottle & Books", "icon": "fa-book-open", "target": [-0.28, 0.31, -0.41], "distance": 0.82, "box": [118, 138] },
+        { "name": "Globe", "icon": "fa-globe", "target": [0.365, 0.743, -0.312], "distance": 0.62, "box": [82, 82] }
+      ]
+    },
+    {
+      "name": "Robot",
+      "coarse": "robot/coarse_res32.obj",
+      "ours": "robot/ours.obj",
+      "camera": [2.55, 1.25, 2.85],
+      "focus": [
+        { "name": "Overview", "icon": "fa-cube" }
+      ]
+    }
+  ]
+}

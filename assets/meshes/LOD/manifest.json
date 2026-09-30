@@ -1,0 +1,37 @@
+{
+  "sets": [
+    {
+      "name": "Case 01",
+      "meshes": [
+        { "level": 4, "file": "1(291)/res4_plain.obj" },
+        { "level": 16, "file": "1(291)/res16_plain.obj" },
+        { "level": 32, "file": "1(291)/res32_plain.obj" },
+        { "level": 64, "file": "1(291)/1(291)_sr_32to64_depth6.obj" },
+        { "level": 128, "file": "1(291)/1(291)_sr_64to128_depth7.obj" },
+        { "level": 512, "file": "1(291)/1(291)_sr_256to512_depth9.obj" }
+      ]
+    },
+    {
+      "name": "Case 02",
+      "meshes": [
+        { "level": 4, "file": "1(35)/res4_plain.obj" },
+        { "level": 16, "file": "1(35)/res16_plain.obj" },
+        { "level": 32, "file": "1(35)/res32_plain.obj" },
+        { "level": 64, "file": "1(35)/1(35)_sr_32to64_depth6.obj" },
+        { "level": 128, "file": "1(35)/1(35)_sr_64to128_depth7.obj" },
+        { "level": 512, "file": "1(35)/1(35)_sr_256to512_depth9.obj" }
+      ]
+    },
+    {
+      "name": "Case 03",
+      "meshes": [
+        { "level": 4, "file": "7kZ-fb3XGO9lbnH9XSFqY(1)/res4_plain.obj" },
+        { "level": 16, "file": "7kZ-fb3XGO9lbnH9XSFqY(1)/res16_plain.obj" },
+        { "level": 32, "file": "7kZ-fb3XGO9lbnH9XSFqY(1)/res32_plain.obj" },
+        { "level": 64, "file": "7kZ-fb3XGO9lbnH9XSFqY(1)/7kZ-fb3XGO9lbnH9XSFqY(1)_sr_32to64_depth6.obj" },
+        { "level": 128, "file": "7kZ-fb3XGO9lbnH9XSFqY(1)/7kZ-fb3XGO9lbnH9XSFqY(1)_sr_64to128_depth7.obj" },
+        { "level": 512, "file": "7kZ-fb3XGO9lbnH9XSFqY(1)/7kZ-fb3XGO9lbnH9XSFqY(1)_sr_256to512_depth9.obj" }
+      ]
+    }
+  ]
+}

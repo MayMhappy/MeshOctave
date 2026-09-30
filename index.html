@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MeshOctave generates detailed meshes through progressive split-and-rewire refinement cascades.">
+  <meta name="keywords" content="MeshOctave, 3D mesh generation, mesh refinement, subdivision, masked diffusion, split and rewire">
+  <meta name="theme-color" content="#10162b">
+  <title>MeshOctave | Split-and-Rewire Cascades for Mesh Generation</title>
+  <link rel="icon" href="assets/images/favicon.svg?v=20260922-1" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260922-9">
+</head>
+<body class="is-preload">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="site-header__logo" href="#top" aria-label="MeshOctave home">Mesh<span>Octave</span></a>
+      <button class="site-header__toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="site-header__nav" id="site-nav" aria-label="Page sections">
+        <a href="#abstract">Abstract</a>
+        <a href="#idea">Core Idea</a>
+        <a href="#method">Method</a>
+        <a href="#generation">Generation</a>
+        <a href="#subdivision">Subdivision</a>
+        <a href="#comparison">Comparison</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="hero__media" aria-hidden="true">
+        <img src="assets/images/teaser.png?v=20260924-1" width="3822" height="2295" alt="" fetchpriority="high">
+      </div>
+      <div class="hero__veil" aria-hidden="true"></div>
+      <div class="container hero__inner">
+        <div class="hero__copy">
+          <p class="hero__eyebrow">Coarse-to-fine mesh generation</p>
+          <h1 class="hero__title"><span class="hero__title-mark">MeshOctave</span>: Split-and-Rewire Cascades for Mesh Generation</h1>
+
+          <div class="actions">
+            <a class="actions__btn" href="#generation"><i class="fa-solid fa-cube" aria-hidden="true"></i> Results</a>
+          </div>
+
+          <div class="hero__facts" aria-label="Key facts">
+            <div class="hero__fact">
+              <strong>Split + Rewire</strong>
+              <span>Joint mesh refinement</span>
+            </div>
+            <div class="hero__fact">
+              <strong>Coarse → Fine</strong>
+              <span>Cascaded generation</span>
+            </div>
+            <div class="hero__fact">
+              <strong>Multi-resolution</strong>
+              <span>Progressive detail</span>
+            </div>
+          </div>
+        </div>
+        <a class="hero__scroll" href="#abstract">
+          <span>Explore the method</span>
+          <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
+        </a>
+      </div>
+    </section>
+
+    <section class="section" id="abstract">
+      <div class="container narrow">
+        <header class="section__head section__head--center">
+          <h2 class="section__title">Abstract</h2>
+        </header>
+        <div class="prose">
+          <p>
+            Generating compact, artist-style meshes with explicit topology typically relies on autoregressive models—which incur prohibitive sequential per-token costs—or continuous flow models that depend on heuristic connectivity decoders. Next-scale generation paradigms offer a compelling alternative by enabling parallel token prediction within each scale; yet, existing methods derive hierarchical levels via progressive mesh simplification and invert them sequentially. This eliminates intra-scale parallelism and scales generation steps linearly with face count. We propose <span class="term">MeshOctave</span>, which instead defines scale through dyadic spatial grid resolutions, framing coarsening as a deterministic collapse that merges vertices sharing a voxel cell and inherits connectivity. Its inverse operation, <span class="term">split-and-rewire</span>, determines which octant sub-vertices are instantiated for each coarse face and resolves local connectivity using discrete refinement tokens. Because these per-face operations require no serialization, each scale transition is modeled as an unordered set that adds one bit of coordinate precision, naturally supporting dynamic-length meshes and adaptive resolution refinement. We construct a scale-conditioned masked-uniform discrete diffusion model to learn split-and-rewire refinement from resolution collapse hierarchies. MeshOctave outperforms strong baselines in geometric fidelity and topological validity, while supporting adaptive resolution refinement and extending naturally to mesh subdivision tasks.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--muted" id="idea">
+      <div class="container">
+        <header class="section__head section__head--center">
+          <p class="section__eyebrow">Core Idea</p>
+          <h2 class="section__title">Grow geometry and connectivity together</h2>
+          <p class="section__sub">Each refinement stage expands the current mesh locally, then predicts the connections needed to turn the new samples into a coherent surface.</p>
+        </header>
+
+        <div class="factorization">
+          <article class="factor-card factor-card--vertex">
+            <span class="factor-card__label">Stage 01 · Expand</span>
+            <h3>Split</h3>
+            <p>Represent every parent vertex with a local child grid and select occupied child positions to increase geometric resolution.</p>
+          </article>
+          <div class="factorization__arrow" aria-hidden="true">→</div>
+          <article class="factor-card factor-card--topology">
+            <span class="factor-card__label">Stage 02 · Connect</span>
+            <h3>Rewire</h3>
+            <p>Predict intra-parent and inter-parent connections among selected children so the refined vertices form a valid mesh.</p>
+          </article>
+        </div>
+
+        <figure class="figure figure--core-encoding">
+          <img src="assets/images/tokenizer.png" width="3000" height="447" alt="MeshOctave mesh encoding for split, occupancy, intra-connectivity, and inter-connectivity" loading="lazy">
+          <figcaption>
+            <strong>Mesh encoding.</strong> Refinement is represented by child occupancy, connections within a parent neighborhood, and connections across adjacent parent neighborhoods. The same representation also supports resolution collapse.
+          </figcaption>
+        </figure>
+
+        <div class="equation-card" aria-label="Cascaded mesh refinement">
+          M<sub>0</sub> → M<sub>1</sub> → ··· → M<sub>L</sub>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="method">
+      <div class="container">
+        <header class="section__head section__head--center">
+          <p class="section__eyebrow">Pipeline</p>
+          <h2 class="section__title">Cascaded Mesh Refinement</h2>
+          <p class="section__sub">A masked diffusion transformer performs one learned refinement step; applying the same split-and-rewire process across resolutions turns a coarse mesh into a detailed result.</p>
+        </header>
+
+        <figure class="figure">
+          <img src="assets/images/pipeline.png?v=20260925-1" width="3425" height="1020" alt="MeshOctave one-resolution refinement pipeline" loading="lazy">
+          <figcaption>
+            <strong>One-resolution refinement.</strong> The parent mesh is encoded into face and masked refinement tokens. A masked diffusion transformer combines self-attention, conditioning through cross-attention, and timestep/level modulation before occupancy and connectivity heads decode the refined mesh.
+          </figcaption>
+        </figure>
+
+        <div class="method-flow">
+          <article class="method-step">
+            <span class="method-step__number">01</span>
+            <h3>
+              <span class="method-step__name">Tokenize</span>
+              <span class="method-step__subtitle">Structured mesh state</span>
+            </h3>
+            <p>Encode parent vertices, faces, child occupancy, and local connectivity in a representation designed for refinement.</p>
+          </article>
+          <article class="method-step">
+            <span class="method-step__number">02</span>
+            <h3>
+              <span class="method-step__name">Denoise</span>
+              <span class="method-step__subtitle">Masked diffusion</span>
+            </h3>
+            <p>Use self-attention and conditioning features to jointly recover the masked refinement tokens at the current level.</p>
+          </article>
+          <article class="method-step">
+            <span class="method-step__number">03</span>
+            <h3>
+              <span class="method-step__name">Decode</span>
+              <span class="method-step__subtitle">Split and rewire</span>
+            </h3>
+            <p>Select occupied children, then decode intra- and inter-connectivity to construct the next-resolution mesh.</p>
+          </article>
+          <article class="method-step">
+            <span class="method-step__number">04</span>
+            <h3>
+              <span class="method-step__name">Cascade</span>
+              <span class="method-step__subtitle">Progressive detail</span>
+            </h3>
+            <p>Repeat the learned refinement step across levels to scale from a compact coarse mesh to a detailed final surface.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--muted" id="generation">
+      <div class="container">
+        <header class="section__head section__head--center">
+          <p class="section__eyebrow">Generation Result</p>
+          <h2 class="section__title">Coarse-to-fine Mesh Generation</h2>
+          <p class="section__sub">MeshOctave begins with a compact mesh and repeatedly applies learned split-and-rewire refinement to generate detailed geometry and coherent connectivity.</p>
+        </header>
+
+        <div class="viewer-group viewer-group--obj" data-viewer-group data-mesh-viewer-group data-single-viewer-group data-set-count="1" data-current-set="1">
+          <div class="viewer-switcher" aria-label="Switch generation result set">
+            <button class="viewer-switcher__btn" type="button" data-viewer-prev aria-label="Show previous generation result set">
+              <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+            </button>
+            <span class="viewer-switcher__counter" data-viewer-counter>Set 01 / 01</span>
+            <button class="viewer-switcher__btn" type="button" data-viewer-next aria-label="Show next generation result set">
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+            <span class="sr-only" data-viewer-status aria-live="polite"></span>
+          </div>
+
+          <div class="viewer-grid viewer-grid--triple">
+            <article class="viewer-card viewer-card--stacked" data-viewer-slot>
+              <div class="mesh-viewer" data-obj-viewer data-obj-path="assets/meshes/single/1(23)_y.obj" role="img" aria-label="Interactive viewer for generated mesh OBJ 1">
+                <span class="viewer-badge">OBJ 01</span>
+                <span class="mesh-viewer__loading">Loading mesh</span>
+                <span class="viewer-hint">drag to rotate · scroll to zoom</span>
+              </div>
+              <div class="viewer-card__copy viewer-card__copy--stats">
+                <div class="mesh-stats" aria-label="Mesh statistics">
+                  <div class="mesh-stat">
+                    <span>Faces</span>
+                    <strong data-mesh-faces>—</strong>
+                  </div>
+                  <div class="mesh-stat">
+                    <span>Vertices</span>
+                    <strong data-mesh-vertices>—</strong>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="viewer-card viewer-card--stacked" data-viewer-slot>
+              <div class="mesh-viewer" data-obj-viewer data-obj-path="assets/meshes/single/1(28)_y.obj" role="img" aria-label="Interactive viewer for generated mesh OBJ 2">
+                <span class="viewer-badge">OBJ 02</span>
+                <span class="mesh-viewer__loading">Loading mesh</span>
+                <span class="viewer-hint">drag to rotate · scroll to zoom</span>
+              </div>
+              <div class="viewer-card__copy viewer-card__copy--stats">
+                <div class="mesh-stats" aria-label="Mesh statistics">
+                  <div class="mesh-stat">
+                    <span>Faces</span>
+                    <strong data-mesh-faces>—</strong>
+                  </div>
+                  <div class="mesh-stat">
+                    <span>Vertices</span>
+                    <strong data-mesh-vertices>—</strong>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="viewer-card viewer-card--stacked" data-viewer-slot>
+              <div class="mesh-viewer" data-obj-viewer data-obj-path="assets/meshes/single/1(35)_y.obj" role="img" aria-label="Interactive viewer for generated mesh OBJ 3">
+                <span class="viewer-badge">OBJ 03</span>
+                <span class="mesh-viewer__loading">Loading mesh</span>
+                <span class="viewer-hint">drag to rotate · scroll to zoom</span>
+              </div>
+              <div class="viewer-card__copy viewer-card__copy--stats">
+                <div class="mesh-stats" aria-label="Mesh statistics">
+                  <div class="mesh-stat">
+                    <span>Faces</span>
+                    <strong data-mesh-faces>—</strong>
+                  </div>
+                  <div class="mesh-stat">
+                    <span>Vertices</span>
+                    <strong data-mesh-vertices>—</strong>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="showcase-subsection">
+          <header class="section__head section__head--center">
+            <p class="section__eyebrow">Multi-resolution Generation</p>
+            <h2 class="section__title">Generation at Different Resolutions</h2>
+            <p class="section__sub">Each case shows the same generated mesh across six spatial resolutions, revealing how geometry and connectivity emerge from coarse structure to fine detail.</p>
+          </header>
+
+          <div class="viewer-group" data-viewer-group data-mesh-viewer-group data-multi-resolution-viewer-group data-set-count="1" data-current-set="1">
+            <div class="viewer-switcher" aria-label="Switch multi-resolution sample">
+              <button class="viewer-switcher__btn" type="button" data-viewer-prev aria-label="Show previous multi-resolution sample">
+                <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+              </button>
+              <span class="viewer-switcher__counter" data-viewer-counter>Case 01 / 03</span>
+              <button class="viewer-switcher__btn" type="button" data-viewer-next aria-label="Show next multi-resolution sample">
+                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+              </button>
+              <span class="sr-only" data-viewer-status aria-live="polite"></span>
+            </div>
+
+            <div class="viewer-grid viewer-grid--six">
+              <article class="viewer-card viewer-card--stacked viewer-card--density" data-viewer-slot>
+                <div class="mesh-viewer mesh-viewer--density" data-multi-resolution-viewer data-resolution-level="4" data-obj-path="assets/meshes/LOD/1(291)/res4_plain.obj" role="img" aria-label="Interactive viewer for mesh generated at resolution 4">
+                  <span class="viewer-badge">Resolution 4</span>
+                  <span class="mesh-viewer__loading">Loading mesh</span>
+                  <span class="viewer-hint">drag to rotate · scroll to zoom</span>
+                </div>
+              </article>
+
+              <article class="viewer-card viewer-card--stacked viewer-card--density" data-viewer-slot>
+                <div class="mesh-viewer mesh-viewer--density" data-multi-resolution-viewer data-resolution-level="16" data-obj-path="assets/meshes/LOD/1(291)/res16_plain.obj" role="img" aria-label="Interactive viewer for mesh generated at resolution 16">
+                  <span class="viewer-badge">Resolution 16</span>
+                  <span class="mesh-viewer__loading">Loading mesh</span>
+                  <span class="viewer-hint">drag to rotate · scroll to zoom</span>
+                </div>
+              </article>
+
+              <article class="viewer-card viewer-card--stacked viewer-card--density" data-viewer-slot>
+                <div class="mesh-viewer mesh-viewer--density" data-multi-resolution-viewer data-resolution-level="32" data-obj-path="assets/meshes/LOD/1(291)/res32_plain.obj" role="img" aria-label="Interactive viewer for mesh generated at resolution 32">
+                  <span class="viewer-badge">Resolution 32</span>
+                  <span class="mesh-viewer__loading">Loading mesh</span>
+                  <span class="viewer-hint">drag to rotate · scroll to zoom</span>
+                </div>
+              </article>
+
+              <article class="viewer-card viewer-card--stacked viewer-card--density" data-viewer-slot>
+                <div class="mesh-viewer mesh-viewer--density" data-multi-resolution-viewer data-resolution-level="64" data-obj-path="assets/meshes/LOD/1(291)/1(291)_sr_32to64_depth6.obj" role="img" aria-label="Interactive viewer for mesh generated at resolution 64">
+                  <span class="viewer-badge">Resolution 64</span>
+                  <span class="mesh-viewer__loading">Loading mesh</span>
+                  <span class="viewer-hint">drag to rotate · scroll to zoom</span>
+                </div>
+              </article>
+
+              <article class="viewer-card viewer-card--stacked viewer-card--density" data-viewer-slot>
+                <div class="mesh-viewer mesh-viewer--density" data-multi-resolution-viewer data-resolution-level="128" data-obj-path="assets/meshes/LOD/1(291)/1(291)_sr_64to128_depth7.obj" role="img" aria-label="Interactive viewer for mesh generated at resolution 128">
+                  <span class="viewer-badge">Resolution 128</span>
+                  <span class="mesh-viewer__loading">Loading mesh</span>
+                  <span class="viewer-hint">drag to rotate · scroll to zoom</span>
+                </div>
+              </article>
+
+              <article class="viewer-card viewer-card--stacked viewer-card--density" data-viewer-slot>
+                <div class="mesh-viewer mesh-viewer--density" data-multi-resolution-viewer data-resolution-level="512" data-obj-path="assets/meshes/LOD/1(291)/1(291)_sr_256to512_depth9.obj" role="img" aria-label="Interactive viewer for mesh generated at resolution 512">
+                  <span class="viewer-badge">Resolution 512</span>
+                  <span class="mesh-viewer__loading">Loading mesh</span>
+                  <span class="viewer-hint">drag to rotate · scroll to zoom</span>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="subdivision">
+      <div class="container">
+        <header class="section__head section__head--center">
+          <p class="section__eyebrow">Application</p>
+          <h2 class="section__title">Learned Mesh Subdivision</h2>
+          <p class="section__sub">The split-and-rewire operator refines a coarse input while recovering local geometric detail and adaptive connectivity.</p>
+        </header>
+
+        <div class="subdivision-viewer" data-subdivision-viewer-group>
+          <div class="subdivision-viewer__toolbar">
+            <button class="viewer-switcher__btn" type="button" data-subdivision-prev aria-label="Show previous subdivision example">
+              <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+            </button>
+            <div class="subdivision-viewer__identity">
+              <span class="subdivision-viewer__counter" data-subdivision-counter>01 / 02</span>
+              <span class="subdivision-viewer__separator" aria-hidden="true">·</span>
+              <strong data-subdivision-name>Desk</strong>
+            </div>
+            <button class="viewer-switcher__btn" type="button" data-subdivision-next aria-label="Show next subdivision example">
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+            <div class="subdivision-focus" aria-label="Zoom to a subdivision detail">
+              <span class="subdivision-focus__label"><i class="fa-solid fa-arrow-pointer" aria-hidden="true"></i> Click a boxed detail</span>
+              <button class="subdivision-focus__reset" type="button" data-subdivision-focus-reset>
+                <i class="fa-solid fa-compress" aria-hidden="true"></i> Overview
+              </button>
+            </div>
+            <span class="sr-only" data-subdivision-status aria-live="polite"></span>
+          </div>
+
+          <div class="subdivision-viewer__grid">
+            <article class="subdivision-card" data-subdivision-slot="coarse">
+              <header class="subdivision-card__head">
+                <h3><span>Input</span><i aria-hidden="true">·</i> Coarse mesh</h3>
+                <button class="subdivision-card__expand" type="button" data-viewer-fullscreen aria-label="View coarse mesh in fullscreen">
+                  <i class="fa-solid fa-expand" aria-hidden="true"></i>
+                  <span>Inspect</span>
+                </button>
+              </header>
+              <div class="mesh-viewer mesh-viewer--detail" data-subdivision-viewer role="img" aria-label="Interactive coarse subdivision input">
+                <span class="viewer-badge">Coarse</span>
+                <span class="mesh-viewer__loading">Loading mesh</span>
+                <span class="viewer-hint">drag to rotate · right-drag to pan · scroll to zoom</span>
+              </div>
+              <div class="mesh-stats" aria-label="Coarse mesh statistics">
+                <div class="mesh-stat"><span>Faces</span><strong data-mesh-faces>—</strong></div>
+                <div class="mesh-stat"><span>Vertices</span><strong data-mesh-vertices>—</strong></div>
+              </div>
+            </article>
+
+            <article class="subdivision-card subdivision-card--ours" data-subdivision-slot="ours">
+              <header class="subdivision-card__head">
+                <h3><span>Prediction</span><i aria-hidden="true">·</i> MeshOctave</h3>
+                <button class="subdivision-card__expand" type="button" data-viewer-fullscreen aria-label="View MeshOctave prediction in fullscreen">
+                  <i class="fa-solid fa-expand" aria-hidden="true"></i>
+                  <span>Inspect</span>
+                </button>
+              </header>
+              <div class="mesh-viewer mesh-viewer--detail" data-subdivision-viewer role="img" aria-label="Interactive MeshOctave subdivision prediction">
+                <span class="viewer-badge">Ours</span>
+                <span class="mesh-viewer__loading">Loading mesh</span>
+                <span class="viewer-hint">views stay synchronized · zoom to inspect detail</span>
+              </div>
+              <div class="mesh-stats" aria-label="Predicted mesh statistics">
+                <div class="mesh-stat"><span>Faces</span><strong data-mesh-faces>—</strong></div>
+                <div class="mesh-stat"><span>Vertices</span><strong data-mesh-vertices>—</strong></div>
+              </div>
+            </article>
+          </div>
+
+          <p class="subdivision-viewer__note"><i class="fa-solid fa-link" aria-hidden="true"></i> Select a detail to zoom both views to the same part; manual camera movements remain synchronized.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="comparison">
+      <div class="container">
+        <header class="section__head section__head--center">
+          <p class="section__eyebrow">Comparison</p>
+          <h2 class="section__title">Qualitative Comparison</h2>
+          <p class="section__sub">MeshOctave recovers detailed geometry and coherent triangulation across a range of complex shapes.</p>
+        </header>
+
+        <figure class="figure">
+          <img src="assets/images/cmp_all.png" width="3499" height="1881" alt="Qualitative comparison of MeshOctave against prior mesh generation methods" loading="lazy">
+          <figcaption>
+            <strong>Qualitative comparison.</strong> MeshOctave preserves recognizable structure and fine surface detail while producing cleaner, more complete meshes than prior approaches.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p><strong>MeshOctave</strong> · Split-and-Rewire Cascades for Mesh Generation</p>
+      <p>Research project page</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js?v=20260922-3"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="assets/js/mesh-viewer.js?v=20260922-22"></script>
+</body>
+</html>
