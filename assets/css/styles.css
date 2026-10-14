@@ -508,6 +508,10 @@
       animation: hero-content-rise 0.75s ease-out 0.94s both;
     }
 
+    .hero__notes span {
+      display: block;
+    }
+
     .actions {
       display: flex;
       flex-wrap: wrap;
